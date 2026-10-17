@@ -1,0 +1,10 @@
+{
+	"appId": "com.cartoniq.app",
+	"appName": "CartonIQ",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https",
+		"cleartext": false
+	},
+	"android": {}
+}

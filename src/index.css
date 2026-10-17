@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+/* Fix for the green Android text cursor handle */
+* {
+  accent-color: #fbbf24 !important; /* Amber/Yellow */
+  caret-color: #fbbf24 !important;  /* Changes the blinking cursor to Yellow */
+}
+
+/* Style the selection highlight */
+::selection {
+  background-color: #fbbf24 !important;
+  color: #000000 !important;
+}
+
+/* Hide the ugly native Android scrollbar */
+::-webkit-scrollbar {
+  width: 0px !important;
+  background: transparent !important;
+}
+
+/* Smooth scrolling for the whole app */
+html, body {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Force cursor color to override Android defaults */
+input, textarea, select {
+  caret-color: #fbbf24 !important;
+  accent-color: #fbbf24 !important;
+}
+
+/* Disable native text selection handles and menus on inputs */
+input, textarea {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+/* Completely disable native Android text selection handles */
+input, textarea, select {
+  -webkit-user-select: none !important;
+  -khtml-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}

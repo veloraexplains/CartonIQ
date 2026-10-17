@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">#FBBF24</item>
+        <item name="colorPrimaryDark">#FBBF24</item>
+        <item name="colorAccent">#FBBF24</item>
+        <item name="android:textColorHighlight">#FBBF24</item>
+        <item name="android:colorControlActivated">#FBBF24</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">#FBBF24</item>
+        <item name="colorPrimaryDark">#FBBF24</item>
+        <item name="colorAccent">#FBBF24</item>
+        <item name="android:textColorHighlight">#FBBF24</item>
+        <item name="android:colorControlActivated">#FBBF24</item>
+    </style>
+
+    <style name="AppTheme.NoActionBarLaunch" parent="AppTheme.NoActionBar">
+    </style>
+</resources>
