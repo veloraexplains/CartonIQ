@@ -155,17 +155,17 @@ const testimonials = [
 const pricing = [
   {
     name: 'Starter',
-    price: '₹0',
-    description: 'For new packaging teams testing workflow improvements.',
-    included: ['Basic calculator', 'Simple quoting', 'Local storage'],
-    highlight: false,
+    price: '₹499 only',
+    description: 'Buy the app and start using the packaging workflow immediately.',
+    included: ['Full CartonIQ access', 'Box calculator', 'Simple quoting', 'Local storage'],
+    highlight: true,
   },
   {
     name: 'Business',
     price: 'Custom',
     description: 'For growing packaging businesses managing orders and quotations.',
     included: ['Full CartonIQ suite', 'CRM + reporting', 'Production workflow'],
-    highlight: true,
+    highlight: false,
   },
 ];
 
@@ -497,7 +497,7 @@ export default function App() {
                       : 'border border-white/10 bg-slate-900 text-white hover:border-white/20'
                   }`}
                 >
-                  {plan.highlight ? 'Request a quote' : 'Get started'}
+                  {plan.highlight ? 'Buy App — ₹499' : 'Get started'}
                 </a>
               </div>
             ))}
@@ -525,7 +525,7 @@ export default function App() {
                     <input className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none" placeholder="Company" />
                   </div>
 
-                  <input className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none" type="email" placeholder="Email address" />
+                  <input className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none" type="email" placeholder="velora.explains@gmail.com" defaultValue="velora.explains@gmail.com" />
 
                   <textarea
                     className="min-h-32 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
@@ -533,9 +533,16 @@ export default function App() {
                   />
 
                   <button type="button" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-400 px-6 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-300">
-                    Request a demo
+                    Buy App — ₹499
                     <ArrowRight className="h-4 w-4" />
                   </button>
+
+                  <div className="mt-3 text-sm text-slate-400">
+                    Or contact us directly:
+                    <a href="mailto:velora.explains@gmail.com" className="ml-2 font-semibold text-white">
+                      velora.explains@gmail.com
+                    </a>
+                  </div>
                 </form>
               </div>
             </div>
