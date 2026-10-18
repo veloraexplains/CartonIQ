@@ -20,6 +20,7 @@ import {
   Users,
   Warehouse,
 } from 'lucide-react';
+import Box3D from './components/Box3D';
 
 type Feature = {
   title: string;
@@ -178,6 +179,11 @@ export default function App() {
   const [buyerEmail, setBuyerEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
+  const [boxWidth, setBoxWidth] = useState(500);
+  const [boxHeight, setBoxHeight] = useState(350);
+  const [boxDepth, setBoxDepth] = useState(220);
+  const [boxStyle, setBoxStyle] = useState<'solid' | 'corrugated' | 'wireframe'>('corrugated');
+  const [boxColor, setBoxColor] = useState('#f59e0b');
 
   const openPurchaseMail = () => {
     const orderId = generateOrderId();
@@ -392,19 +398,94 @@ export default function App() {
               </div>
             </div>
 
-            <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {modules.map((module) => {
-                const Icon = module.icon;
-                return (
-                  <div key={module.title} className="group rounded-3xl border border-white/10 bg-slate-950/80 p-6 transition hover:-translate-y-1 hover:border-amber-400/40">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 text-amber-300 transition group-hover:bg-amber-400 group-hover:text-slate-950">
-                      <Icon className="h-5 w-5" />
+            <div className="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+              <div className="space-y-5">
+                {modules.map((module) => {
+                  const Icon = module.icon;
+                  return (
+                    <div key={module.title} className="group rounded-3xl border border-white/10 bg-slate-950/80 p-6 transition hover:-translate-y-1 hover:border-amber-400/40">
+                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 text-amber-300 transition group-hover:bg-amber-400 group-hover:text-slate-950">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <h3 className="text-xl font-bold text-white">{module.title}</h3>
+                      <p className="mt-3 text-slate-300">{module.description}</p>
                     </div>
-                    <h3 className="text-xl font-bold text-white">{module.title}</h3>
-                    <p className="mt-3 text-slate-300">{module.description}</p>
+                  );
+                })}
+              </div>
+
+              <div className="rounded-[28px] border border-white/10 bg-slate-950/80 p-4 shadow-2xl shadow-slate-950/40">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400">3D carton preview</div>
+                    <h3 className="mt-2 text-xl font-black text-white">Custom box styles</h3>
                   </div>
-                );
-              })}
+                  <div className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-amber-300">
+                    live
+                  </div>
+                </div>
+
+                <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 p-2">
+                  <Box3D width={boxWidth} height={boxHeight} depth={boxDepth} color={boxColor} style={boxStyle} />
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <label className="block text-sm text-slate-300">
+                    <span className="mb-1 block">Width (mm)</span>
+                    <input
+                      type="number"
+                      value={boxWidth}
+                      onChange={(e) => setBoxWidth(Number(e.target.value) || 500)}
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none ring-0 focus:border-amber-400"
+                    />
+                  </label>
+
+                  <label className="block text-sm text-slate-300">
+                    <span className="mb-1 block">Height (mm)</span>
+                    <input
+                      type="number"
+                      value={boxHeight}
+                      onChange={(e) => setBoxHeight(Number(e.target.value) || 350)}
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none ring-0 focus:border-amber-400"
+                    />
+                  </label>
+
+                  <label className="block text-sm text-slate-300">
+                    <span className="mb-1 block">Depth (mm)</span>
+                    <input
+                      type="number"
+                      value={boxDepth}
+                      onChange={(e) => setBoxDepth(Number(e.target.value) || 220)}
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none ring-0 focus:border-amber-400"
+                    />
+                  </label>
+
+                  <label className="block text-sm text-slate-300">
+                    <span className="mb-1 block">Style</span>
+                    <select
+                      value={boxStyle}
+                      onChange={(e) => setBoxStyle(e.target.value as 'solid' | 'corrugated' | 'wireframe')}
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-amber-400"
+                    >
+                      <option value="solid">Solid</option>
+                      <option value="corrugated">Corrugated</option>
+                      <option value="wireframe">Wireframe</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div className="mt-4 flex items-center gap-3">
+                  <label className="block text-sm text-slate-300">
+                    <span className="mb-1 block">Color</span>
+                    <input
+                      type="color"
+                      value={boxColor}
+                      onChange={(e) => setBoxColor(e.target.value)}
+                      className="h-11 w-16 rounded-lg border border-slate-700 bg-slate-950 p-1"
+                    />
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </section>
