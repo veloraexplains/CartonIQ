@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import {
   ArrowRight,
   BarChart3,
+  Box,
   Boxes,
   Calculator,
   Check,
