@@ -1,541 +1,557 @@
-import React, { useState, useEffect } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import {
-  FactoryConfig,
-  BoxStyle,
-  Customer,
-  ProductionOrder,
-  AppLockConfig
-} from './types';
-import {
-  getFactoryConfig,
-  getAppLockConfig,
-  saveAppLockConfig,
-  logActivity
-} from './utils/storage';
-import { SmartCalculator } from './components/calculator/SmartCalculator';
-import { BoxDesigner } from './components/designer/BoxDesigner';
-import { CustomerCRM } from './components/crm/CustomerCRM';
-import { QuotationManager } from './components/quotations/QuotationManager';
-import { OrderTracker } from './components/orders/OrderTracker';
-import { InventoryManager } from './components/inventory/InventoryManager';
-import { ReportsView } from './components/reports/ReportsView';
-import { FactorySettingsView } from './components/settings/FactorySettingsView';
-import { AppLockScreen } from './components/security/AppLockScreen';
-import { EngineeringSuite } from './components/engineering/EngineeringSuite';
-import {
-  Calculator,
-  Box,
-  Users,
-  FileText,
-  PackageCheck,
-  Boxes,
+  ArrowRight,
   BarChart3,
-  Settings,
-  Download,
-  Smartphone,
-  Layers,
-  Sparkles,
+  Boxes,
+  Calculator,
+  Check,
   ChevronRight,
-  Menu,
-  X,
-  Lock,
+  FileText,
+  Factory,
+  Layers3,
+  PackageCheck,
   ShieldCheck,
-  Cpu
+  Smartphone,
+  Sparkles,
+  Star,
+  Truck,
+  Users,
+  Warehouse,
 } from 'lucide-react';
 
-type ActiveNavTab =
-  | 'calculator'
-  | 'designer'
-  | 'engineering'
-  | 'crm'
-  | 'quotations'
-  | 'orders'
-  | 'inventory'
-  | 'reports'
-  | 'settings';
+type Feature = {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+};
+
+type Module = {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+};
+
+const features: Feature[] = [
+  {
+    title: 'Industrial box calculator',
+    description:
+      'Calculate corrugated board dimensions, paper usage, GSM, box cost, and margin in seconds with precise manufacturing logic.',
+    icon: Calculator,
+  },
+  {
+    title: '3D box designer',
+    description:
+      'Visualize carton structures before production, test dimensions, and validate fit before quotation or dispatch.',
+    icon: Layers3,
+  },
+  {
+    title: 'CRM + customer insight',
+    description:
+      'Store customer data, track order history, and manage buyer-specific requirements in one organized production workflow.',
+    icon: Users,
+  },
+  {
+    title: 'Smart quotations',
+    description:
+      'Generate polished PDFs, pricing sheets, and professional quotes with your branding and product logic built in.',
+    icon: FileText,
+  },
+  {
+    title: 'Order tracking',
+    description:
+      'Monitor live production flow, customer orders, deadlines, and progress across the full packaging cycle.',
+    icon: PackageCheck,
+  },
+  {
+    title: 'Inventory + reporting',
+    description:
+      'Track raw materials, production performance, and profitability with operational dashboards for everyday decisions.',
+    icon: BarChart3,
+  },
+];
+
+const modules: Module[] = [
+  {
+    title: 'Calculator',
+    description: 'FEFCO-friendly box logic, material estimate, cutting calculations, and margin insights.',
+    icon: Calculator,
+  },
+  {
+    title: '3D Designer',
+    description: 'Preview carton structure in 3D to validate form, dimensions, and production fit.',
+    icon: Box,
+  },
+  {
+    title: 'Quotes & Orders',
+    description: 'Build itemized quotations and convert them into production orders without leaving the system.',
+    icon: FileText,
+  },
+  {
+    title: 'CRM',
+    description: 'Track customers, approval history, pricing preferences, and contact communication.',
+    icon: Users,
+  },
+  {
+    title: 'Inventory',
+    description: 'Manage stock, board supply, and packaging material usage for a smooth industrial workflow.',
+    icon: Warehouse,
+  },
+  {
+    title: 'Security',
+    description: 'App lock, privacy-first local storage, and secure access for field and plant usage.',
+    icon: ShieldCheck,
+  },
+];
+
+const workflowSteps = [
+  {
+    title: '1. Define the box',
+    text: 'Choose box style, dimensions, ply, flute, and material parameters to model the exact carton requirement.',
+  },
+  {
+    title: '2. Design and validate',
+    text: 'Use the 3D designer to inspect structure, balance dimensions, and prepare the right manufacturing specification.',
+  },
+  {
+    title: '3. Price and produce',
+    text: 'Generate quotes, lock orders, track inventory, and move production from estimate to dispatch with confidence.',
+  },
+];
+
+const trustPoints = [
+  'Built for corrugated packaging businesses',
+  'Works as a mobile-first production suite',
+  'Offline-first data flow for real-world factory use',
+  'Professional quoting and production visibility',
+  'Designed to reduce manual costing mistakes',
+  'Fits core packaging operations end to end',
+];
+
+const industries = ['Flexible packaging', 'Corrugated boxes', 'Print & packaging plants', 'E-commerce fulfillment', 'Export packing'];
+
+const stats = [
+  { value: '100%', label: 'On-device workflow' },
+  { value: '6+', label: 'core business modules' },
+  { value: '24/7', label: 'plant-ready access' },
+  { value: '1 app', label: 'for estimating + operations' },
+];
+
+const testimonials = [
+  {
+    quote:
+      'CartonIQ gave our sales and production teams one consistent way to estimate, design, and quote packaging jobs without friction.',
+    person: 'Operations Manager',
+    company: 'Packaging Unit',
+  },
+  {
+    quote:
+      'The instant cost feedback and 3D box validation made our planning process faster and far more accurate.',
+    person: 'Production Lead',
+    company: 'Box Manufacturing',
+  },
+];
+
+const pricing = [
+  {
+    name: 'Starter',
+    price: '₹0',
+    description: 'For new packaging teams testing workflow improvements.',
+    included: ['Basic calculator', 'Simple quoting', 'Local storage'],
+    highlight: false,
+  },
+  {
+    name: 'Business',
+    price: 'Custom',
+    description: 'For growing packaging businesses managing orders and quotations.',
+    included: ['Full CartonIQ suite', 'CRM + reporting', 'Production workflow'],
+    highlight: true,
+  },
+];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<ActiveNavTab>('calculator');
-  const [factoryConfig, setFactoryConfig] = useState<FactoryConfig>(getFactoryConfig());
-  const [appLockConfig, setAppLockConfig] = useState<AppLockConfig>(getAppLockConfig());
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Initial App Lock verification
-  const [isAppLocked, setIsAppLocked] = useState<boolean>(() => {
-    const cfg = getAppLockConfig();
-    if (!cfg.isEnabled || !cfg.pin) return false;
-    if (cfg.autoLockMinutes === 0) return true; // Immediate lock
-    if (cfg.autoLockMinutes === -1) return false; // Manual lock only
-    const idleMs = Date.now() - (cfg.lastUnlockedAt || 0);
-    return idleMs > cfg.autoLockMinutes * 60 * 1000;
-  });
-
-  // Cross-module state flow
-  // 1. Calculator -> Quotation transfer
-  const [preloadedQuoteItem, setPreloadedQuoteItem] = useState<{
-    name: string;
-    style: any;
-    l: number;
-    w: number;
-    h: number;
-    dimensionsDisplay?: string;
-    ply: any;
-    flute: any;
-    unitPrice: number;
-    customQty?: number;
-    weightGrams: number;
-    quantities: { qty: number; unitPrice: number; totalPrice: number }[];
-  } | null>(null);
-
-  // 2. Calculator -> 3D Designer transfer
-  const [designerInitialDims, setDesignerInitialDims] = useState<{
-    l: string;
-    w: string;
-    h: string;
-    style: BoxStyle;
-    unit?: import('./types').DimensionUnit;
-  } | undefined>(undefined);
-
-  // ZIP Generation state
-  const [isGeneratingZip, setIsGeneratingZip] = useState(false);
-
-  // Periodic Inactivity Checker for Auto-Lock
-  useEffect(() => {
-    if (!appLockConfig.isEnabled || !appLockConfig.pin || isAppLocked) return;
-    if (appLockConfig.autoLockMinutes <= 0) return;
-
-    const interval = setInterval(() => {
-      const currentCfg = getAppLockConfig();
-      if (!currentCfg.isEnabled || !currentCfg.pin) return;
-      if (currentCfg.autoLockMinutes > 0 && currentCfg.lastUnlockedAt) {
-        const elapsedMs = Date.now() - currentCfg.lastUnlockedAt;
-        if (elapsedMs > currentCfg.autoLockMinutes * 60 * 1000) {
-          setIsAppLocked(true);
-          logActivity('Auto-Locked by Inactivity Timer', 'security', `Screen locked after ${currentCfg.autoLockMinutes} min idle`);
-        }
-      }
-    }, 15000);
-
-    return () => clearInterval(interval);
-  }, [appLockConfig, isAppLocked]);
-
-  const handleUnlocked = () => {
-    const updated: AppLockConfig = {
-      ...appLockConfig,
-      lastUnlockedAt: Date.now(),
-    };
-    saveAppLockConfig(updated);
-    setAppLockConfig(updated);
-    setIsAppLocked(false);
-    logActivity('App Unlocked', 'security', 'User authenticated with PIN');
-  };
-
-  const handleResetPinWithRecovery = (newPin: string) => {
-    const updated: AppLockConfig = {
-      ...appLockConfig,
-      pin: newPin,
-      lastUnlockedAt: Date.now(),
-    };
-    saveAppLockConfig(updated);
-    setAppLockConfig(updated);
-    setIsAppLocked(false);
-    logActivity('PIN Reset via Recovery', 'security', 'User reset PIN using security question');
-  };
-
-  const handleLockAppNow = () => {
-    setIsAppLocked(true);
-    logActivity('Manual App Lock', 'security', 'User locked screen manually');
-  };
-
-  const handleDatabaseChanged = () => {
-    setFactoryConfig(getFactoryConfig());
-    setAppLockConfig(getAppLockConfig());
-  };
-
-  const handleTransferToQuotation = (spec: any) => {
-    setPreloadedQuoteItem(spec);
-    setActiveTab('quotations');
-  };
-
-  const handleOpenDesigner = (
-    l: string,
-    w: string,
-    h: string,
-    style: BoxStyle,
-    unit: import('./types').DimensionUnit
-  ) => {
-    setDesignerInitialDims({ l, w, h, style, unit });
-  useEffect(() => {
-    // Disable the Android text selection (ghost handles) globally
-    const disableSelection = () => {
-      document.querySelectorAll('input').forEach(input => {
-        input.setAttribute('style', 'user-select: none; -webkit-user-select: none;');
-      });
-    };
-    
-    // Run immediately and whenever the DOM changes
-    disableSelection();
-    const observer = new MutationObserver(disableSelection);
-    observer.observe(document.body, { childList: true, subtree: true });
-    
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    // Force the cursor color on all input elements
-    const style = document.createElement('style');
-    style.innerHTML = `
-      input[type="text" inputMode="decimal"], input[type="text"] {
-        caret-color: #fbbf24 !important;
-      }
-      ::selection {
-        background-color: #fbbf24 !important;
-        color: #000000 !important;
-      }
-    `;
-    document.head.appendChild(style);
-  }, []);
-
-    setActiveTab('designer');
-  };
-
-  const [downloadNotice, setDownloadNotice] = useState<string | null>(null);
-
-  const handleDownloadProjectZip = async () => {
-    setIsGeneratingZip(true);
-    setDownloadNotice('Preparing CartonIQ project package...');
-    try {
-      // Fetch the binary zip directly through the active session
-      const res = await fetch('./termux-android-project.zip', { cache: 'no-cache' });
-      if (!res.ok) {
-        throw new Error(`Server returned HTTP ${res.status}`);
-      }
-      const blob = await res.blob();
-      
-      // If the file is smaller than 50KB, it's the 10KB Google Cloud auth redirect HTML page
-      if (blob.size < 50000) {
-        alert(
-          `Warning: Downloaded file is only ${(blob.size / 1024).toFixed(1)} KB (authentication redirect). Please make sure you are tapping this button directly inside the CartonIQ app preview!`
-        );
-        setDownloadNotice('Download intercepted by auth redirect. Please retry inside preview.');
-        return;
-      }
-
-      // Create blob URL for genuine binary download
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = 'CartonIQ-Termux-Android.zip';
-      document.body.appendChild(link);
-      link.click();
-      
-      // Cleanup object URL
-      setTimeout(() => {
-        window.URL.revokeObjectURL(blobUrl);
-        document.body.removeChild(link);
-      }, 1000);
-
-      const sizeKb = (blob.size / 1024).toFixed(1);
-      setDownloadNotice(`✅ CartonIQ-Termux-Android.zip (${sizeKb} KB) downloaded to your phone!`);
-      setTimeout(() => setDownloadNotice(null), 6000);
-    } catch (err: any) {
-      console.error('ZIP download error:', err);
-      // Fallback direct navigation
-      const link = document.createElement('a');
-      link.href = './termux-android-project.zip';
-      link.download = 'CartonIQ-Termux-Android.zip';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setDownloadNotice('Triggered browser download.');
-      setTimeout(() => setDownloadNotice(null), 4000);
-    } finally {
-      setIsGeneratingZip(false);
-    }
-  };
-
-  const navItems: { id: ActiveNavTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { id: 'calculator', label: 'Calculator', icon: Calculator },
-    { id: 'designer', label: '3D Designer', icon: Box },
-    { id: 'engineering', label: 'Plant Tools', icon: Cpu },
-    { id: 'crm', label: 'CRM', icon: Users },
-    { id: 'quotations', label: 'Quotations', icon: FileText },
-    { id: 'orders', label: 'Orders', icon: PackageCheck },
-    { id: 'inventory', label: 'Inventory', icon: Boxes },
-    { id: 'reports', label: 'Reports', icon: BarChart3 },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ];
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-400 selection:text-slate-950">
-      {/* APP LOCK OVERLAY */}
-      {isAppLocked && appLockConfig.isEnabled && (
-        <AppLockScreen
-          config={appLockConfig}
-          onUnlocked={handleUnlocked}
-          onResetPinWithRecovery={handleResetPinWithRecovery}
-        />
-      )}
-
-      {/* Top Professional Header */}
-      <header className="sticky top-0 z-40 border-b border-slate-800/90 bg-slate-900/95 backdrop-blur-md px-4 py-2.5">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          {/* Logo & Branding */}
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveTab('calculator')}>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 shadow-md shadow-amber-950 font-black text-lg">
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/85 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 via-orange-400 to-amber-500 text-lg font-black text-slate-950 shadow-lg shadow-amber-500/30">
               C
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-base tracking-tight text-white">CartonIQ</span>
-                <span className="text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30 px-1.5 py-0.5 rounded">
+                <span className="text-xl font-extrabold tracking-tight">CartonIQ</span>
+                <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">
                   Suite
                 </span>
-                {appLockConfig.isEnabled && (
-                  <span className="text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 rounded hidden sm:inline-flex items-center gap-1">
-                    <ShieldCheck className="w-2.5 h-2.5" />
-                    Locked
-                  </span>
-                )}
               </div>
-              <p className="text-[10px] text-slate-400 font-medium tracking-wide">
-                Design • Calculate • Manufacture
-              </p>
+              <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Smart packaging business</div>
             </div>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1 bg-slate-950/70 p-1 rounded-xl border border-slate-800 text-xs">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-1.5 py-1.5 px-3 rounded-lg font-medium transition-all ${
-                    isActive
-                      ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
+          <nav className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
+            <a href="#features" className="transition hover:text-white">Features</a>
+            <a href="#platform" className="transition hover:text-white">Platform</a>
+            <a href="#workflow" className="transition hover:text-white">How it works</a>
+            <a href="#pricing" className="transition hover:text-white">Pricing</a>
+            <a href="#contact" className="transition hover:text-white">Contact</a>
           </nav>
 
-          {/* Right Action: Lock Button, Download Project ZIP & Mobile Menu Toggle */}
-          <div className="flex items-center gap-2">
-            {appLockConfig.isEnabled && (
-              <button
-                onClick={handleLockAppNow}
-                className="flex items-center gap-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 px-2.5 py-1.5 rounded-xl transition-all"
-                title="Lock Application Now"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Lock</span>
-              </button>
-            )}
-
-
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white lg:hidden"
-              aria-label="Toggle navigation"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+          <div className="hidden items-center gap-3 md:flex">
+            <a href="#contact" className="rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-amber-400/40 hover:text-white">
+              Book demo
+            </a>
+            <a href="#pricing" className="rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-300">
+              Get started
+            </a>
           </div>
         </div>
+      </header>
 
-        {/* Mobile Dropdown Menu */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden mt-2 pt-2 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
+      <main>
+        <section className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.18),transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.15),transparent_28%)]" />
+          <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6 lg:px-8 lg:pb-28 lg:pt-20">
+            <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]">
+              <div>
+                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Built for packaging teams
+                </div>
+
+                <h1 className="max-w-2xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
+                  Smarter carton design, quotes, and production workflow.
+                </h1>
+
+                <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
+                  CartonIQ helps packaging businesses calculate costs, design carton structures, generate quotations,
+                  and manage orders from one streamlined system built for real-world production work.
+                </p>
+
+                <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <a
+                    href="#contact"
+                    className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-6 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/25 transition hover:bg-amber-300"
+                  >
+                    Schedule a demo
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                  <a
+                    href="#platform"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-900/80 px-6 py-3 text-sm font-semibold text-slate-100 transition hover:border-white/20 hover:bg-slate-800"
+                  >
+                    Explore platform
+                    <ChevronRight className="h-4 w-4" />
+                  </a>
+                </div>
+
+                <div className="mt-8 flex flex-wrap gap-6 text-sm text-slate-400">
+                  <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-400" /> Offline-first workflow</div>
+                  <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-400" /> Mobile-ready industrial app</div>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="overflow-hidden rounded-[28px] border border-white/10 bg-slate-900/80 p-3 shadow-2xl shadow-slate-950/60">
+                  <div className="rounded-[22px] border border-white/10 bg-slate-950 p-5">
+                    <div className="mb-5 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 w-3 rounded-full bg-amber-400" />
+                        <div className="h-3 w-3 rounded-full bg-emerald-400" />
+                        <div className="h-3 w-3 rounded-full bg-rose-400" />
+                      </div>
+                      <div className="rounded-full border border-slate-700 bg-slate-800 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-300">
+                        live dashboard
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-4">
+                      <div className="mb-4 flex items-center justify-between">
+                        <div>
+                          <div className="text-xs uppercase tracking-[0.18em] text-slate-400">Box estimate</div>
+                          <div className="mt-2 text-2xl font-black text-white">₹14,280</div>
+                        </div>
+                        <div className="rounded-xl bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-300">
+                          +12.4% margin
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="rounded-xl border border-slate-800 bg-slate-900 p-3">
+                          <div className="mb-2 flex justify-between text-xs text-slate-400">
+                            <span>Box style</span>
+                            <span>RSC 0201</span>
+                          </div>
+                          <div className="flex justify-between text-sm font-medium text-slate-200">
+                            <span>500 x 350 x 220 mm</span>
+                            <span>3 ply</span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="rounded-xl border border-slate-800 bg-slate-900 p-3">
+                            <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Material</div>
+                            <div className="mt-2 text-lg font-bold text-white">GSM 180</div>
+                          </div>
+                          <div className="rounded-xl border border-slate-800 bg-slate-900 p-3">
+                            <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Output</div>
+                            <div className="mt-2 text-lg font-bold text-white">1,250 pcs</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-14 grid max-w-5xl grid-cols-2 gap-4 md:grid-cols-4">
+              {stats.map((stat) => (
+                <div key={stat.label} className="rounded-2xl border border-white/10 bg-slate-900/70 p-5 backdrop-blur-sm">
+                  <div className="text-2xl font-black text-white">{stat.value}</div>
+                  <div className="mt-1 text-sm text-slate-400">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="features" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">
+              <Star className="h-3.5 w-3.5" />
+              Why businesses choose CartonIQ
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">Everything a packaging business needs in one platform.</h2>
+          </div>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {features.map((feature) => {
+              const Icon = feature.icon;
               return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`flex items-center gap-2 p-2 rounded-lg text-xs font-medium text-left transition-all ${
-                    isActive
-                      ? 'bg-amber-400 text-slate-950 font-bold'
-                      : 'bg-slate-950/80 text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5 shrink-0" />
-                  <span>{item.label}</span>
-                </button>
+                <div key={feature.title} className="rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-lg shadow-slate-950/20">
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 to-orange-500 text-slate-950 shadow-lg shadow-amber-500/20">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="mb-3 text-xl font-bold text-white">{feature.title}</h3>
+                  <p className="leading-7 text-slate-300">{feature.description}</p>
+                </div>
               );
             })}
           </div>
-        )}
-      </header>
+        </section>
 
-      {/* Download Status Toast Banner */}
-      {downloadNotice && (
-        <div className="bg-emerald-600/95 border-b border-emerald-500 text-white text-xs font-semibold py-2.5 px-4 text-center shadow-lg flex items-center justify-center gap-2 transition-all">
-          <span>{downloadNotice}</span>
-        </div>
-      )}
+        <section id="platform" className="border-y border-white/10 bg-slate-900/60">
+          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-2xl">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">
+                  <Factory className="h-3.5 w-3.5" />
+                  Platform overview
+                </div>
+                <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">A complete design-to-production workflow for carton operations.</h2>
+              </div>
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/80 px-4 py-2 text-sm text-slate-300">
+                <Smartphone className="h-4 w-4 text-amber-300" />
+                Mobile-first + desktop-ready
+              </div>
+            </div>
 
-      {/* Secondary Mobile Quick Bar for Fast Thumb Navigation */}
-      <div className="lg:hidden sticky top-[57px] z-30 bg-slate-900/90 border-b border-slate-800/80 px-2 py-1.5 overflow-x-auto flex items-center gap-1.5 no-scrollbar text-xs">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`flex items-center gap-1.5 py-1 px-2.5 rounded-lg whitespace-nowrap text-[11px] font-medium transition-all ${
-                isActive
-                  ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
-                  : 'bg-slate-950 text-slate-400 hover:text-white'
-              }`}
-            >
-              <Icon className="w-3 h-3" />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
+            <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {modules.map((module) => {
+                const Icon = module.icon;
+                return (
+                  <div key={module.title} className="group rounded-3xl border border-white/10 bg-slate-950/80 p-6 transition hover:-translate-y-1 hover:border-amber-400/40">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 text-amber-300 transition group-hover:bg-amber-400 group-hover:text-slate-950">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white">{module.title}</h3>
+                    <p className="mt-3 text-slate-300">{module.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-4 pb-20 sm:pb-8">
-        {activeTab === 'calculator' && (
-          <SmartCalculator
-            factoryConfig={factoryConfig}
-            onTransferToQuotation={handleTransferToQuotation}
-            onOpenDesigner={handleOpenDesigner}
-          />
-        )}
+        <section id="workflow" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">
+              <Truck className="h-3.5 w-3.5" />
+              How it works
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">From product concept to production-ready packaging.</h2>
+          </div>
 
-        {activeTab === 'designer' && (
-          <BoxDesigner
-            initialDimensions={designerInitialDims}
-            onTransferToCalculator={(l, w, h, style) => {
-              setActiveTab('calculator');
-            }}
-          />
-        )}
+          <div className="mt-10 grid gap-6 lg:grid-cols-3">
+            {workflowSteps.map((step, index) => (
+              <div key={step.title} className="relative rounded-3xl border border-white/10 bg-slate-900/80 p-6">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 to-orange-500 font-black text-slate-950">
+                  {index + 1}
+                </div>
+                <h3 className="text-xl font-bold text-white">{step.title}</h3>
+                <p className="mt-3 leading-7 text-slate-300">{step.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        {activeTab === 'engineering' && (
-          <EngineeringSuite
-            factoryConfig={factoryConfig}
-            onSendToCalculator={(l, w, h) => {
-              setDesignerInitialDims({ l, w, h, style: 'RSC_0201', unit: 'mm' });
-              setActiveTab('calculator');
-            }}
-          />
-        )}
+        <section className="border-y border-white/10 bg-gradient-to-b from-slate-900 to-slate-950">
+          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+            <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+              <div>
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  Trusted by packaging teams
+                </div>
+                <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">Built for the real operating realities of packaging businesses.</h2>
+                <div className="mt-8 space-y-4">
+                  {trustPoints.map((point) => (
+                    <div key={point} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-slate-900/70 p-4">
+                      <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300">
+                        <Check className="h-4 w-4" />
+                      </div>
+                      <span className="text-slate-200">{point}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-        {activeTab === 'crm' && (
-          <CustomerCRM
-            onSelectCustomerForQuote={(customer) => {
-              setActiveTab('quotations');
-            }}
-          />
-        )}
+              <div className="rounded-[30px] border border-white/10 bg-slate-950/90 p-6 shadow-2xl shadow-slate-950/40">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {industries.map((industry) => (
+                    <div key={industry} className="rounded-2xl border border-slate-800 bg-slate-900 p-4 text-sm font-semibold text-slate-200">
+                      {industry}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        {activeTab === 'quotations' && (
-          <QuotationManager
-            factoryConfig={factoryConfig}
-            preloadedItem={preloadedQuoteItem}
-            onClearPreloaded={() => setPreloadedQuoteItem(null)}
-          />
-        )}
+        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">
+              <Sparkles className="h-3.5 w-3.5" />
+              Customer feedback
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">Teams trust CartonIQ to simplify packaging operations.</h2>
+          </div>
 
-        {activeTab === 'orders' && <OrderTracker factoryConfig={factoryConfig} />}
+          <div className="mt-10 grid gap-6 lg:grid-cols-2">
+            {testimonials.map((item) => (
+              <div key={item.person} className="rounded-3xl border border-white/10 bg-slate-900/70 p-6">
+                <div className="mb-4 flex gap-1 text-amber-400">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-current" />
+                  ))}
+                </div>
+                <p className="text-lg leading-8 text-slate-200">“{item.quote}”</p>
+                <div className="mt-6 border-t border-white/10 pt-4">
+                  <div className="font-bold text-white">{item.person}</div>
+                  <div className="text-sm text-slate-400">{item.company}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        {activeTab === 'inventory' && <InventoryManager factoryConfig={factoryConfig} />}
+        <section id="pricing" className="mx-auto max-w-7xl px-4 pb-20 pt-8 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">
+              <Boxes className="h-3.5 w-3.5" />
+              Flexible pricing
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">Choose the packaging workflow that fits your business.</h2>
+          </div>
 
-        {activeTab === 'reports' && <ReportsView factoryConfig={factoryConfig} />}
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            {pricing.map((plan) => (
+              <div
+                key={plan.name}
+                className={`rounded-[28px] border p-6 ${
+                  plan.highlight
+                    ? 'border-amber-400/50 bg-gradient-to-br from-amber-400/15 to-slate-950 shadow-xl shadow-amber-500/10'
+                    : 'border-white/10 bg-slate-900/70'
+                }`}
+              >
+                <div className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">{plan.name}</div>
+                <div className="mt-4 text-4xl font-black text-white">{plan.price}</div>
+                <p className="mt-3 text-slate-300">{plan.description}</p>
 
-        {activeTab === 'settings' && (
-          <FactorySettingsView
-            currentConfig={factoryConfig}
-            onConfigUpdated={setFactoryConfig}
-            onDownloadProjectZip={handleDownloadProjectZip}
-            isGeneratingZip={isGeneratingZip}
-            onLockNow={handleLockAppNow}
-            onDatabaseChanged={handleDatabaseChanged}
-          />
-        )}
+                <ul className="mt-6 space-y-3 text-slate-200">
+                  {plan.included.map((item) => (
+                    <li key={item} className="flex items-center gap-3">
+                      <Check className="h-4 w-4 text-emerald-400" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                <a
+                  href="#contact"
+                  className={`mt-8 inline-flex w-full items-center justify-center rounded-full px-4 py-3 text-sm font-bold transition ${
+                    plan.highlight
+                      ? 'bg-amber-400 text-slate-950 hover:bg-amber-300'
+                      : 'border border-white/10 bg-slate-900 text-white hover:border-white/20'
+                  }`}
+                >
+                  {plan.highlight ? 'Request a quote' : 'Get started'}
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="contact" className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950">
+          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+              <div>
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">
+                  <FileText className="h-3.5 w-3.5" />
+                  Ready to see it live?
+                </div>
+                <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">Let’s design a packaging workflow that fits your business.</h2>
+                <p className="mt-5 max-w-lg leading-7 text-slate-300">
+                  Whether you are a corrugated box factory, printing unit, or packaging operations team, CartonIQ is designed to help you estimate faster and produce smarter.
+                </p>
+              </div>
+
+              <div className="rounded-[30px] border border-white/10 bg-slate-900/80 p-6 shadow-2xl shadow-slate-950/50">
+                <form className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <input className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none" placeholder="Your name" />
+                    <input className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none" placeholder="Company" />
+                  </div>
+
+                  <input className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none" type="email" placeholder="Email address" />
+
+                  <textarea
+                    className="min-h-32 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
+                    placeholder="Tell us about your packaging workflow, volume, and requirements"
+                  />
+
+                  <button type="button" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-400 px-6 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-300">
+                    Request a demo
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
-      {/* Mobile Bottom Dock Bar */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 border-t border-slate-800/90 py-1.5 px-3 lg:hidden backdrop-blur-md flex items-center justify-around">
-        <button
-          onClick={() => setActiveTab('calculator')}
-          className={`flex flex-col items-center gap-0.5 p-1 text-[10px] ${
-            activeTab === 'calculator' ? 'text-amber-400 font-bold' : 'text-slate-400'
-          }`}
-        >
-          <Calculator className="w-4 h-4" />
-          <span>Calc</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('designer')}
-          className={`flex flex-col items-center gap-0.5 p-1 text-[10px] ${
-            activeTab === 'designer' ? 'text-amber-400 font-bold' : 'text-slate-400'
-          }`}
-        >
-          <Box className="w-4 h-4" />
-          <span>3D Box</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('engineering')}
-          className={`flex flex-col items-center gap-0.5 p-1 text-[10px] ${
-            activeTab === 'engineering' ? 'text-amber-400 font-bold' : 'text-slate-400'
-          }`}
-        >
-          <Cpu className="w-4 h-4" />
-          <span>Tools</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('quotations')}
-          className={`flex flex-col items-center gap-0.5 p-1 text-[10px] ${
-            activeTab === 'quotations' ? 'text-amber-400 font-bold' : 'text-slate-400'
-          }`}
-        >
-          <FileText className="w-4 h-4" />
-          <span>Quotes</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('orders')}
-          className={`flex flex-col items-center gap-0.5 p-1 text-[10px] ${
-            activeTab === 'orders' ? 'text-amber-400 font-bold' : 'text-slate-400'
-          }`}
-        >
-          <PackageCheck className="w-4 h-4" />
-          <span>Orders</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('settings')}
-          className={`flex flex-col items-center gap-0.5 p-1 text-[10px] ${
-            activeTab === 'settings' ? 'text-amber-400 font-bold' : 'text-slate-400'
-          }`}
-        >
-          <Settings className="w-4 h-4" />
-          <span>Plant</span>
-        </button>
-      </div>
-
-      {/* Desktop Footer */}
-      <footer className="hidden sm:block border-t border-slate-900 bg-slate-950 py-3 px-4 text-center text-xs text-slate-500">
-        CartonIQ — Smart Packaging Business Suite • Termux Android APK Ready • compileSdk 34 • targetSdk 34 • minSdk 24 • 100% On-Device Privacy
+      <footer className="border-t border-white/10 bg-slate-950/90">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-8 text-sm text-slate-400 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-300 to-orange-500 text-sm font-black text-slate-950">
+              C
+            </div>
+            <span className="font-semibold text-slate-200">CartonIQ</span>
+          </div>
+          <div>Smart packaging business suite for carton design, costing, quoting, and production planning.</div>
+        </div>
       </footer>
     </div>
   );
